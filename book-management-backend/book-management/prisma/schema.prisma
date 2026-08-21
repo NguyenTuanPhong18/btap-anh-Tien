@@ -1,0 +1,101 @@
+// ============================================
+// PRISMA SCHEMA - Hệ thống quản lý sách
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // đổi thành "mysql" nếu bạn dùng MySQL
+  url      = env("DATABASE_URL")
+}
+
+// ---------- ENUM: Vai trò người dùng ----------
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+// ---------- ENUM: Trạng thái đơn hàng ----------
+enum OrderStatus {
+  PENDING    // Chờ xử lý
+  CONFIRMED  // Đã xác nhận
+  SHIPPING   // Đang giao
+  COMPLETED  // Hoàn thành
+  CANCELLED  // Đã hủy
+}
+
+// ---------- BẢNG: User (tài khoản) ----------
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // sẽ lưu bản đã hash bằng bcrypt, không lưu plain text
+  fullName  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[] // 1 user có nhiều đơn hàng
+
+  @@map("users")
+}
+
+// ---------- BẢNG: Category (danh mục sách) ----------
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  books Book[] // 1 danh mục có nhiều sách
+
+  @@map("categories")
+}
+
+// ---------- BẢNG: Book (sách) ----------
+model Book {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0) // số lượng tồn kho
+  imageUrl    String?
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("books")
+}
+
+// ---------- BẢNG: Order (đơn hàng) ----------
+model Order {
+  id        String      @id @default(uuid())
+  userId    String
+  status    OrderStatus @default(PENDING)
+  total     Decimal     @db.Decimal(10, 2)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+// ---------- BẢNG: OrderItem (chi tiết đơn hàng - sách nào, số lượng bao nhiêu) ----------
+model OrderItem {
+  id       String  @id @default(uuid())
+  orderId  String
+  bookId   String
+  quantity Int
+  price    Decimal @db.Decimal(10, 2) // giá tại thời điểm đặt hàng
+
+  order Order @relation(fields: [orderId], references: [id])
+  book  Book  @relation(fields: [bookId], references: [id])
+
+  @@map("order_items")
+}

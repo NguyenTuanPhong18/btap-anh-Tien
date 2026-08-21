@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-paper text-ink-900 font-body antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: theme("fontFamily.display");
+}
+
+:focus-visible {
+  outline: 2px solid theme("colors.brass.500");
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Nhãn "số hiệu mục lục" kiểu thẻ thư viện cũ - dùng cho danh mục, mã đơn... */
+  .catalog-tag {
+    @apply inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.14em] text-brass-600;
+  }
+
+  .btn-primary {
+    @apply rounded-full bg-ink-900 px-6 py-2.5 text-sm font-medium text-white transition
+           hover:bg-ink-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-100 disabled:text-ink-300;
+  }
+  .btn-secondary {
+    @apply rounded-full border border-ink-100 bg-white px-5 py-2.5 text-sm font-medium text-ink-600 transition
+           hover:border-ink-800 hover:text-ink-900;
+  }
+  .field {
+    @apply w-full rounded-lg border border-ink-100 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none
+           transition placeholder:text-ink-300 focus:border-brass-500;
+  }
+  .card {
+    @apply rounded-2xl border border-ink-100 bg-white shadow-card;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rise-in {
+      animation: rise-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
